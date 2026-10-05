@@ -15,7 +15,7 @@
  */
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import MemberCard from "../components/MemberCard";
 import { MIN_MEMBERS, MAX_MEMBERS, createEmptyMember, createInitialFormState } from "../utils/constants";
@@ -46,9 +46,12 @@ function emptyMemberError() {
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const { state } = useLocation();
 
-  // ── Form state ─────────────────────────────────────────────────────
-  const [formState, setFormState] = useState(createInitialFormState);
+  // ── Form state — restored from ReviewPage if coming back ───────────
+  const [formState, setFormState] = useState(
+    () => state?.registration ?? createInitialFormState()
+  );
 
   // ── Validation errors (only shown after first submit attempt) ─────
   const [submitted, setSubmitted] = useState(false);

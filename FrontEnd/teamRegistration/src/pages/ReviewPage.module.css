@@ -1,0 +1,431 @@
+/* ============================================================
+   ReviewPage.module.css
+   Visual preview page — dark blue & black, matches RegisterPage.
+   ============================================================ */
+
+/* ── Page wrapper ─────────────────────────────────────────── */
+.page {
+  min-height: 100vh;
+  background-color: #030711;
+  padding: 48px 16px 88px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.container {
+  width: 100%;
+  max-width: 800px;
+}
+
+/* ── Top label ────────────────────────────────────────────── */
+.topLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #38bdf8;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PREVIEW CARD
+═══════════════════════════════════════════════════════════ */
+.previewCard {
+  background-color: #08111e;
+  border: 1px solid #14243b;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px #0d1f35;
+  margin-bottom: 28px;
+  position: relative;
+}
+
+/* Glowing cyan strip at top of card */
+.cardGlow {
+  height: 3px;
+  background: linear-gradient(90deg, #0077b6 0%, #00d2ff 50%, #0077b6 100%);
+  box-shadow: 0 0 18px rgba(0, 210, 255, 0.45);
+}
+
+/* ── Team banner ──────────────────────────────────────────── */
+.teamBanner {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 28px 30px 24px;
+  flex-wrap: wrap;
+}
+
+.teamIconWrap {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #003d66 0%, #006494 100%);
+  border: 1px solid #00b4d8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(0, 180, 216, 0.25);
+}
+
+.teamIcon {
+  font-size: 1.6rem;
+}
+
+.teamInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.teamLabel {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #38bdf8;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.teamName {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-shadow: 0 0 24px rgba(0, 210, 255, 0.2);
+  word-break: break-word;
+  margin: 0;
+}
+
+.teamStatBadge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #040d1a;
+  border: 1px solid #0e3357;
+  border-radius: 12px;
+  padding: 10px 18px;
+  min-width: 64px;
+}
+
+.statNum {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #00d2ff;
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* ── Divider inside card ──────────────────────────────────── */
+.cardDivider {
+  height: 1px;
+  background-color: #12243a;
+  margin: 0 30px;
+}
+
+/* ── Members section label ────────────────────────────────── */
+.membersLabel {
+  padding: 20px 30px 4px;
+}
+
+.sectionTag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+/* ── Members grid ─────────────────────────────────────────── */
+.membersGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 24px 24px;
+}
+
+/* ── Single member chip ───────────────────────────────────── */
+.memberChip {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background-color: #070e1a;
+  border: 1px solid #1a2f4c;
+  border-radius: 12px;
+  padding: 16px 18px;
+  position: relative;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.memberChip:hover {
+  border-color: #244169;
+  box-shadow: 0 4px 20px rgba(0, 100, 180, 0.1);
+}
+
+/* Leader chip gets a gold accent border */
+.leaderChip {
+  border-color: #78350f;
+  background-color: #070d16;
+}
+
+.leaderChip:hover {
+  border-color: #92400e;
+  box-shadow: 0 4px 20px rgba(120, 53, 15, 0.15);
+}
+
+/* ── Avatar circle ────────────────────────────────────────── */
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0055a5 0%, #00a8cc 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #ffffff;
+  flex-shrink: 0;
+  letter-spacing: 0;
+  box-shadow: 0 0 12px rgba(0, 180, 216, 0.3);
+}
+
+.leaderChip .avatar {
+  background: linear-gradient(135deg, #7c3100 0%, #d97706 100%);
+  box-shadow: 0 0 12px rgba(217, 119, 6, 0.35);
+}
+
+/* ── Chip detail block ────────────────────────────────────── */
+.chipDetails {
+  flex: 1;
+  min-width: 0;
+}
+
+.chipNameRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.chipName {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.leaderTag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fbbf24;
+  background-color: #1c1100;
+  border: 1px solid #78350f;
+  border-radius: 20px;
+  padding: 2px 10px;
+}
+
+.empty {
+  color: #475569;
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* ── Info pills row ───────────────────────────────────────── */
+.infoPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  background-color: #040914;
+  border: 1px solid #0d1e31;
+  border-radius: 20px;
+  padding: 4px 12px;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pillIcon {
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* ── Member number ────────────────────────────────────────── */
+.memberNum {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #1e3a5f;
+  letter-spacing: 0.04em;
+  position: absolute;
+  top: 12px;
+  right: 16px;
+}
+
+.leaderChip .memberNum {
+  color: #4a2400;
+}
+
+/* ── Card footer ──────────────────────────────────────────── */
+.cardFooter {
+  border-top: 1px solid #0d1e31;
+  padding: 14px 30px;
+  background-color: #050c17;
+}
+
+.footerNote {
+  font-size: 0.78rem;
+  color: #475569;
+  letter-spacing: 0.02em;
+}
+
+/* ── Action buttons ───────────────────────────────────────── */
+.actions {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.btnSecondary {
+  flex: 1;
+  min-width: 140px;
+  padding: 14px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background-color: #08111e;
+  color: #94a3b8;
+  border: 1px solid #1a2f4c;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnSecondary:hover {
+  background-color: #0d1e31;
+  border-color: #244169;
+  color: #e2e8f0;
+}
+
+.btnPrimary {
+  flex: 2;
+  min-width: 200px;
+  padding: 14px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background-color: #0077b6;
+  color: #ffffff;
+  border: 1px solid #00b4d8;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 18px rgba(0, 119, 182, 0.45);
+}
+
+.btnPrimary:hover {
+  background-color: #0096c7;
+  border-color: #48cae4;
+  box-shadow: 0 6px 24px rgba(0, 180, 216, 0.6);
+  transform: translateY(-1px);
+}
+
+/* ── Guard / No data ──────────────────────────────────────── */
+.guardBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+  text-align: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.guardIcon {
+  font-size: 3rem;
+}
+
+.guardTitle {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0;
+}
+
+.guardSub {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0 0 16px;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .teamBanner {
+    padding: 20px 18px 18px;
+    gap: 14px;
+  }
+
+  .teamName {
+    font-size: 1.3rem;
+  }
+
+  .membersGrid {
+    padding: 10px 14px 20px;
+  }
+
+  .cardDivider,
+  .membersLabel,
+  .cardFooter {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .memberChip {
+    flex-wrap: wrap;
+  }
+
+  .infoPills {
+    flex-direction: column;
+  }
+
+  .pill {
+    white-space: normal;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .btnSecondary,
+  .btnPrimary {
+    flex: unset;
+    width: 100%;
+  }
+}

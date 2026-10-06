@@ -119,7 +119,7 @@ export default function RegisterPage() {
     if (!isFormValid(validationResult)) return;
 
     // Pass collected registration data to the next step via router state
-    navigate("/register/review", { state: { registration: formState } });
+    window.location.href = "/register/review";
   }
 
   // ── Render ────────────────────────────────────────────────────────────

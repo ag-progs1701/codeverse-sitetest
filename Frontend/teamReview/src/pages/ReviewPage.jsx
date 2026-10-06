@@ -1,36 +1,39 @@
 /**
- * ReviewPage.jsx  —  FrontEnd/teamReview/src/pages/
- * Route: /register/review
+ * ReviewPage.jsx
  *
- * Mirrors RegisterPage layout exactly — same sections, same card structure,
- * but all fields are read-only. "Edit Details" navigates back.
+ * Route: /register/review
+ * Purpose: Review registration details before submitting.
  */
 
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import styles from "./ReviewPage.module.css";
 
-const FIELDS = [
-  { key: "fullName",            label: "Full Name" },
-  { key: "registrationNumber", label: "Registration Number" },
-  { key: "collegeEmail",       label: "College Email" },
-  { key: "phoneNumber",        label: "Phone Number" },
-];
-
 export default function ReviewPage() {
-  const { state }   = useLocation();
-  const navigate    = useNavigate();
+  const { state } = useLocation();
+  const navigate = useNavigate();
+
   const registration = state?.registration;
+
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   if (!registration) {
     return (
       <main className={styles.page}>
-        <div className={styles.container}>
-          <p className={styles.pageSubtitle} style={{ color: "#f87171" }}>
-            No registration data found.{" "}
-            <button className={styles.linkBtn} onClick={() => navigate("/register")}>
-              Go to Registration
-            </button>
+        <div className={styles.guardBox}>
+          <span className={styles.guardIcon}>⚠️</span>
+          <h2 className={styles.guardTitle}>No registration data found.</h2>
+          <p className={styles.guardSub}>
+            Please complete the registration form first.
           </p>
+
+          <button
+            className={styles.btnPrimary}
+            onClick={() => navigate("/register")}
+          >
+            ← Back to Registration
+          </button>
         </div>
       </main>
     );
@@ -38,82 +41,186 @@ export default function ReviewPage() {
 
   const { teamName, members } = registration;
 
+  async function handleConfirmSubmit() {
+    setSubmitting(true);
+    setSubmitError("");
+
+    try {
+      const response = await fetch("http://localhost:5000/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          teamName,
+          members,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Registration failed.");
+      }
+
+      // Registration successfully created in Supabase.
+      // Pass the returned teamId to the payment page.
+      window.location.href = `http://localhost:5174/?teamId=${encodeURIComponent(
+        data.teamId
+      )}`;
+    } catch (error) {
+      console.error("Registration error:", error);
+
+      setSubmitError(
+        error.message || "Unable to submit registration. Please try again."
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <main className={styles.page}>
       <div className={styles.container}>
 
-        <h1 className={styles.pageTitle}>Registration Preview</h1>
-        <p className={styles.pageSubtitle}>
-          CodeVerse Hackathon — Review your details before submitting.
+        {/* Top label */}
+        <p className={styles.topLabel}>
+          ✦ CodeVerse Hackathon · Registration Preview
         </p>
 
-        {/* ── Team Information ──────────────────────────────── */}
-        <section className={styles.section} aria-label="Team information">
-          <h2 className={styles.sectionTitle}>Team Information</h2>
-          <hr className={styles.divider} />
+        {/* Preview Card */}
+        <div className={styles.previewCard}>
 
-          <div className={styles.fieldGroup}>
-            <label className={styles.label}>Team Name</label>
-            <div className={styles.valueBox}>{teamName}</div>
+          {/* Glowing top bar */}
+          <div className={styles.cardGlow} />
+
+          {/* Team banner */}
+          <div className={styles.teamBanner}>
+            <div className={styles.teamIconWrap}>
+              <span className={styles.teamIcon}>⚡</span>
+            </div>
+
+            <div className={styles.teamInfo}>
+              <span className={styles.teamLabel}>TEAM NAME</span>
+              <h1 className={styles.teamName}>{teamName}</h1>
+            </div>
+
+            <div className={styles.teamStatBadge}>
+              <span className={styles.statNum}>{members.length}</span>
+              <span className={styles.statLabel}>Members</span>
+            </div>
           </div>
-        </section>
 
-        {/* ── Team Members ──────────────────────────────────── */}
-        <section className={styles.section} aria-label="Team members">
-          <div className={styles.membersHeader}>
-            <h2 className={styles.sectionTitle}>Team Members</h2>
-            <span className={styles.membersMeta}>
-              {members.length} / 6 members
-            </span>
+          <div className={styles.cardDivider} />
+
+          {/* Members */}
+          <div className={styles.membersLabel}>
+            <span className={styles.sectionTag}>Team Members</span>
           </div>
-          <hr className={styles.divider} />
 
-          <div className={styles.memberList}>
-            {members.map((member, index) => (
-              <div key={index} className={styles.card}>
+          <div className={styles.membersGrid}>
+            {members.map((member, idx) => (
+              <div
+                key={idx}
+                className={`${styles.memberChip} ${idx === 0 ? styles.leaderChip : ""
+                  }`}
+              >
+                {/* Avatar */}
+                <div className={styles.avatar}>
+                  {member.fullName
+                    ? member.fullName.trim().charAt(0).toUpperCase()
+                    : "?"}
+                </div>
 
-                {/* Card header */}
-                <div className={styles.cardHeader}>
-                  <h3 className={styles.cardTitle}>
-                    Member {index + 1}
-                    {index === 0 && (
-                      <span className={styles.leaderNote}>
-                        * Member 1 is the Team Leader.
+                {/* Details */}
+                <div className={styles.chipDetails}>
+
+                  <div className={styles.chipNameRow}>
+                    <span className={styles.chipName}>
+                      {member.fullName || (
+                        <em className={styles.empty}>No name</em>
+                      )}
+                    </span>
+
+                    {idx === 0 && (
+                      <span className={styles.leaderTag}>
+                        👑 Leader
                       </span>
                     )}
-                  </h3>
+                  </div>
+
+                  <div className={styles.infoPills}>
+                    <span className={styles.pill}>
+                      <span className={styles.pillIcon}>🎓</span>
+                      {member.registrationNumber || "—"}
+                    </span>
+
+                    <span className={styles.pill}>
+                      <span className={styles.pillIcon}>✉️</span>
+                      {member.collegeEmail || "—"}
+                    </span>
+
+                    <span className={styles.pill}>
+                      <span className={styles.pillIcon}>📞</span>
+                      {member.phoneNumber || "—"}
+                    </span>
+                  </div>
                 </div>
 
-                {/* Fields grid — read-only */}
-                <div className={styles.grid}>
-                  {FIELDS.map(({ key, label }) => (
-                    <div className={styles.fieldGroup} key={key}>
-                      <label className={styles.label}>{label}</label>
-                      <div className={styles.valueBox}>
-                        {member[key] || <span className={styles.empty}>—</span>}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
+                {/* Member number */}
+                <span className={styles.memberNum}>
+                  #{idx + 1}
+                </span>
               </div>
             ))}
           </div>
-        </section>
 
-        {/* ── Actions ───────────────────────────────────────── */}
-        <div className={styles.actionRow}>
+          {/* Footer note */}
+          <div className={styles.cardFooter}>
+            <span className={styles.footerNote}>
+              🔒 Please verify all details before submitting.
+            </span>
+          </div>
+        </div>
+
+        {/* Error */}
+        {submitError && (
+          <div
+            role="alert"
+            style={{
+              marginTop: "16px",
+              padding: "12px 16px",
+              borderRadius: "8px",
+              background: "#ffe5e5",
+              color: "#b00020",
+            }}
+          >
+            {submitError}
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className={styles.actions}>
           <button
-            className={styles.editBtn}
-            onClick={() => navigate("/register", { state: { registration } })}
+            className={styles.btnSecondary}
+            onClick={() =>
+              navigate("/register", {
+                state: { registration },
+              })
+            }
+            disabled={submitting}
           >
             ← Edit Details
           </button>
+
           <button
-            className={styles.submitBtn}
-            onClick={() => navigate("/register/payment", { state: { registration } })}
+            className={styles.btnPrimary}
+            onClick={handleConfirmSubmit}
+            disabled={submitting}
           >
-            Confirm &amp; Submit →
+            {submitting
+              ? "Submitting..."
+              : "Confirm & Submit →"}
           </button>
         </div>
 

@@ -2,11 +2,10 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useRef, useState } from 'react'
 import '../index.css'
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB in bytes
+const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 const ACCEPTED_FORMATS = ['image/jpeg', 'image/png', 'image/jpg']
 const ACCEPTED_EXTENSIONS = '.jpeg,.png,.jpg'
 
-// Dummy payment data — replace with real data later
 const PAYMENT_INFO = {
   upi: {
     id: 'metaversevitb@indianbk',
@@ -18,7 +17,7 @@ const PAYMENT_INFO = {
     accountNumber: '7967541510',
     ifscCode: 'IDIB000V143',
     beneficiaryName: 'METAVERSE CLUB',
-    accountType: 'SB'
+    accountType: 'SB',
   },
 }
 
@@ -26,13 +25,34 @@ export default function PaymentPage() {
   const location = useLocation()
   const navigate = useNavigate()
 
-  const teamId = new URLSearchParams(location.search).get('teamId')
+  // Retrieve teamId and teamName from search params, location state, or sessionStorage
+  const [teamInfo] = useState(() => {
+    const searchParams = new URLSearchParams(location.search)
+    const paramTeamId = searchParams.get('teamId')
+
+    let stored = null
+    try {
+      const raw = sessionStorage.getItem('codeverse_team')
+      if (raw) stored = JSON.parse(raw)
+    } catch {
+      // ignore parse error
+    }
+
+    const teamId = paramTeamId || location.state?.teamId || stored?.teamId || ''
+    const teamName =
+      location.state?.teamName ||
+      location.state?.registration?.teamName ||
+      stored?.teamName ||
+      'Unknown Team'
+
+    return { teamId, teamName }
+  })
 
   const [activeTab, setActiveTab] = useState('upi')
   const [copied, setCopied] = useState(false)
 
   const [formData, setFormData] = useState({
-    paymentMethod: '',
+    paymentMethod: 'UPI',
     transactionId: '',
     transactionDate: '',
     amount: '',
@@ -42,10 +62,9 @@ export default function PaymentPage() {
   const [filePreview, setFilePreview] = useState(null)
   const [fileError, setFileError] = useState('')
   const [dragActive, setDragActive] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
-  const [uniqueId, setUniqueId] = useState('')
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
 
   const fileInputRef = useRef(null)
 
@@ -61,7 +80,6 @@ export default function PaymentPage() {
       textArea.select()
       document.execCommand('copy')
       document.body.removeChild(textArea)
-
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     }
@@ -69,39 +87,28 @@ export default function PaymentPage() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
+    setFormData((prev) => ({ ...prev, [name]: value }))
 
     if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: '',
-      }))
+      setErrors((prev) => ({ ...prev, [name]: '' }))
     }
   }
 
   const validateFile = (selectedFile) => {
     if (!selectedFile) return ''
-
     if (!ACCEPTED_FORMATS.includes(selectedFile.type)) {
       return 'Invalid file format. Please upload a JPEG, PNG, or JPG image.'
     }
-
     if (selectedFile.size > MAX_FILE_SIZE) {
       return `File size exceeds 10MB. Your file is ${(selectedFile.size / (1024 * 1024)).toFixed(2)}MB.`
     }
-
     return ''
   }
 
   const handleFileSelect = (selectedFile) => {
-    const error = validateFile(selectedFile)
-
-    if (error) {
-      setFileError(error)
+    const err = validateFile(selectedFile)
+    if (err) {
+      setFileError(err)
       setFile(null)
       setFilePreview(null)
       return
@@ -111,11 +118,9 @@ export default function PaymentPage() {
     setFile(selectedFile)
 
     const reader = new FileReader()
-
     reader.onload = (e) => {
       setFilePreview(e.target.result)
     }
-
     reader.readAsDataURL(selectedFile)
   }
 
@@ -128,7 +133,6 @@ export default function PaymentPage() {
   const handleDrag = (e) => {
     e.preventDefault()
     e.stopPropagation()
-
     if (e.type === 'dragenter' || e.type === 'dragover') {
       setDragActive(true)
     } else if (e.type === 'dragleave') {
@@ -139,9 +143,7 @@ export default function PaymentPage() {
   const handleDrop = (e) => {
     e.preventDefault()
     e.stopPropagation()
-
     setDragActive(false)
-
     if (e.dataTransfer.files?.[0]) {
       handleFileSelect(e.dataTransfer.files[0])
     }
@@ -151,7 +153,6 @@ export default function PaymentPage() {
     setFile(null)
     setFilePreview(null)
     setFileError('')
-
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
@@ -159,11 +160,7 @@ export default function PaymentPage() {
 
   const formatFileSize = (bytes) => {
     if (bytes < 1024) return bytes + ' B'
-
-    if (bytes < 1024 * 1024) {
-      return (bytes / 1024).toFixed(1) + ' KB'
-    }
-
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
     return (bytes / (1024 * 1024)).toFixed(2) + ' MB'
   }
 
@@ -171,32 +168,28 @@ export default function PaymentPage() {
     const newErrors = {}
 
     if (!formData.paymentMethod) {
-      newErrors.paymentMethod = 'Please select a payment method'
+      newErrors.paymentMethod = 'Please select a payment method.'
     }
-
     if (!formData.transactionId.trim()) {
-      newErrors.transactionId = 'Transaction ID / UTR is required'
+      newErrors.transactionId = 'Transaction ID / UTR is required.'
     }
-
     if (!formData.transactionDate) {
-      newErrors.transactionDate = 'Transaction date is required'
+      newErrors.transactionDate = 'Transaction date is required.'
     }
-
     if (!formData.amount || Number(formData.amount) <= 0) {
-      newErrors.amount = 'Please enter a valid amount'
+      newErrors.amount = 'Please enter a valid payment amount.'
     }
-
     if (!file) {
-      newErrors.file = 'Payment screenshot is required'
+      newErrors.file = 'Payment screenshot proof is required.'
     }
 
     setErrors(newErrors)
-
     return Object.keys(newErrors).length === 0
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setSubmitError('')
 
     if (!validateForm()) {
       return
@@ -205,453 +198,284 @@ export default function PaymentPage() {
     setIsSubmitting(true)
 
     const formDataToSend = new FormData()
-
-    formDataToSend.append(
-      'paymentMethod',
-      formData.paymentMethod
-    )
-
-    formDataToSend.append(
-      'transactionId',
-      formData.transactionId
-    )
-
-    formDataToSend.append(
-      'transactionDate',
-      formData.transactionDate
-    )
-
-    formDataToSend.append(
-      'amount',
-      formData.amount
-    )
-
-    // Extract team name from state if passed
-    const teamName =
-      location.state?.registration?.teamName || 'Unknown Team'
-
-    formDataToSend.append('teamName', teamName)
-    formDataToSend.append('teamId', teamId)
+    formDataToSend.append('paymentMethod', formData.paymentMethod)
+    formDataToSend.append('transactionId', formData.transactionId)
+    formDataToSend.append('transactionDate', formData.transactionDate)
+    formDataToSend.append('amount', formData.amount)
+    formDataToSend.append('teamName', teamInfo.teamName)
+    formDataToSend.append('teamId', teamInfo.teamId)
     formDataToSend.append('screenshot', file)
 
     try {
-      const response = await fetch(
-        'http://localhost:5000/api/submit-payment',
-        {
-          method: 'POST',
-          body: formDataToSend,
-        }
-      )
-
-      if (!response.ok) {
-        throw new Error(
-          'Failed to submit payment details'
-        )
-      }
+      const response = await fetch('http://localhost:5000/api/submit-payment', {
+        method: 'POST',
+        body: formDataToSend,
+      })
 
       const data = await response.json()
 
-      console.log('Success:', data)
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to submit payment details.')
+      }
 
-      setUniqueId(data.uniqueId)
+      // Save confirmation state for resilience on page refresh
+      const confirmationState = {
+        teamName: data.teamName || teamInfo.teamName,
+        uniqueId: data.uniqueId,
+        status: data.status || 'payment_submitted',
+      }
+
+      try {
+        sessionStorage.setItem('codeverse_confirmation', JSON.stringify(confirmationState))
+      } catch {
+        // ignore
+      }
 
       navigate('/confirmation', {
-        state: {
-          teamName: data.teamName,
-          uniqueId: data.uniqueId,
-        },
+        state: confirmationState,
       })
     } catch (err) {
-      console.error('Error submitting form:', err)
-
-      setErrors((prev) => ({
-        ...prev,
-        submit: err.message,
-      }))
+      console.error('Error submitting payment:', err)
+      setSubmitError(err.message || 'Unable to submit payment. Please verify your details.')
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const handleCloseSuccess = () => {
-    setSubmitted(false)
-
-    setFormData({
-      paymentMethod: '',
-      transactionId: '',
-      transactionDate: '',
-      amount: '',
-    })
-
-    removeFile()
-    setErrors({})
-  }
-
   return (
-    <div className="payment-page">
-      <div className="scanlines"></div>
+    <main className="page">
+      <div className="container">
+        <h1 className="pageTitle">Payment Portal</h1>
+        <p className="pageSubtitle">
+          CodeVerse Hackathon — Execute transaction sequence to finalize registration.
+        </p>
 
-      {/* Holographic Hexagonal Grid Network */}
-      <div className="hologram-container">
-        <div className="hex-node node-1"></div>
-        <div className="hex-node node-2"></div>
-        <div className="hex-node node-3"></div>
-
-        <div className="hex-link link-1"></div>
-        <div className="hex-link link-2"></div>
-      </div>
-
-      <div className="payment-container">
-
-        {/* Header */}
-        <header className="payment-header">
-          <div className="glitch-wrapper">
-            <div className="payment-header__badge">
-              CODEVERSE
-            </div>
+        {/* ── Section 1: Payment Information ───────────────────────── */}
+        <section className="section" aria-label="Payment information">
+          <div className="sectionHeader">
+            <h2 className="sectionTitle">Payment Information</h2>
+            {teamInfo.teamName && (
+              <span className="sectionMeta">
+                Team: {teamInfo.teamName}
+              </span>
+            )}
           </div>
+          <p className="sectionSubtitle">Choose your preferred payment method below.</p>
+          <hr className="divider" />
 
-          <h1
-            className="payment-header__title glitch"
-            data-text="Payment Portal"
-          >
-            Payment Portal
-          </h1>
-
-          <p className="payment-header__subtitle">
-            Execute transaction sequence to finalize registration
-          </p>
-        </header>
-
-        {/* Payment Information Section */}
-        <section className="section-card">
-
-          <div className="hud-corner top-left"></div>
-          <div className="hud-corner top-right"></div>
-          <div className="hud-corner bottom-left"></div>
-          <div className="hud-corner bottom-right"></div>
-
-          <div className="section-card__header">
-            <div className="section-card__icon">
-              💳
-            </div>
-
-            <div>
-              <h2 className="section-card__title">
-                Payment Information
-              </h2>
-
-              <p className="section-card__description">
-                Choose your preferred payment method
-              </p>
-            </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="payment-tabs">
-
+          {/* Payment Method Tabs */}
+          <div className="tabGroup" role="tablist">
             <button
-              className={`payment-tab ${activeTab === 'upi'
-                  ? 'payment-tab--active'
-                  : ''
-                }`}
-              onClick={() => setActiveTab('upi')}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'upi'}
+              className={`tabBtn ${activeTab === 'upi' ? 'tabBtnActive' : ''}`}
+              onClick={() => {
+                setActiveTab('upi')
+                setFormData((prev) => ({ ...prev, paymentMethod: 'UPI' }))
+              }}
             >
-              📱 UPI Payment
+              <span>📱</span> UPI Payment
             </button>
 
             <button
-              className={`payment-tab ${activeTab === 'bank'
-                  ? 'payment-tab--active'
-                  : ''
-                }`}
-              onClick={() => setActiveTab('bank')}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'bank'}
+              className={`tabBtn ${activeTab === 'bank' ? 'tabBtnActive' : ''}`}
+              onClick={() => {
+                setActiveTab('bank')
+                setFormData((prev) => ({ ...prev, paymentMethod: 'Bank Transfer' }))
+              }}
             >
-              🏦 Bank Transfer
+              <span>🏦</span> Bank Transfer
             </button>
-
           </div>
 
-          {/* UPI Content */}
+          {/* UPI View */}
           {activeTab === 'upi' && (
-            <div className="upi-section">
-
-              <div className="upi-id-block">
-
-                <div className="upi-id-label">
-                  UPI ID
+            <div className="card">
+              <div className="upiBlock">
+                <div className="upiDetails">
+                  <span className="label">Official UPI ID</span>
+                  <div className="upiIdBox">
+                    <span>{PAYMENT_INFO.upi.id}</span>
+                    <button type="button" className="copyBtn" onClick={handleCopyUPI}>
+                      {copied ? '✓ Copied' : '📋 Copy UPI ID'}
+                    </button>
+                  </div>
+                  <p style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '10px' }}>
+                    Send the registration fee via any UPI application (GPay, PhonePe, Paytm).
+                  </p>
                 </div>
 
-                <div className="upi-id-value">
-
-                  <span>
-                    {PAYMENT_INFO.upi.id}
-                  </span>
-
-                  <button
-                    className="copy-btn"
-                    onClick={handleCopyUPI}
-                  >
-                    {copied
-                      ? '✓ Copied!'
-                      : '📋 Copy'}
-                  </button>
-
+                <div className="upiQrBox">
+                  <img
+                    className="upiQrImage"
+                    src={PAYMENT_INFO.upi.qrCodeUrl}
+                    alt="UPI QR Code"
+                    onError={(e) => {
+                      e.target.style.display = 'none'
+                    }}
+                  />
+                  <div className="upiQrHint">Scan to Pay</div>
                 </div>
-
               </div>
-
-              <div className="upi-qr-block">
-
-                <img
-                  src={PAYMENT_INFO.upi.qrCodeUrl}
-                  alt="UPI QR Code"
-                  onError={(e) => {
-                    e.target.style.display = 'flex'
-                    e.target.style.alignItems = 'center'
-                    e.target.style.justifyContent = 'center'
-                    e.target.alt = 'QR Code Placeholder'
-                  }}
-                />
-
-                <div className="upi-qr-label">
-                  Scan to Pay
-                </div>
-
-              </div>
-
             </div>
           )}
 
-          {/* Bank Transfer Content */}
+          {/* Bank Transfer View */}
           {activeTab === 'bank' && (
-            <div className="bank-details-grid">
-
-              <div className="bank-detail-item">
-                <div className="bank-detail-item__label">
-                  Account Holder Name
-                </div>
-
-                <div className="bank-detail-item__value">
-                  {PAYMENT_INFO.bank.holderName}
-                </div>
+            <div className="bankGrid">
+              <div className="bankItem">
+                <div className="bankItemLabel">Account Holder</div>
+                <div className="bankItemValue">{PAYMENT_INFO.bank.holderName}</div>
               </div>
 
-              <div className="bank-detail-item">
-                <div className="bank-detail-item__label">
-                  Bank Name
-                </div>
-
-                <div className="bank-detail-item__value">
-                  {PAYMENT_INFO.bank.bankName}
-                </div>
+              <div className="bankItem">
+                <div className="bankItemLabel">Bank Name</div>
+                <div className="bankItemValue">{PAYMENT_INFO.bank.bankName}</div>
               </div>
 
-              <div className="bank-detail-item">
-                <div className="bank-detail-item__label">
-                  Account Number
-                </div>
-
-                <div className="bank-detail-item__value">
-                  {PAYMENT_INFO.bank.accountNumber}
-                </div>
+              <div className="bankItem">
+                <div className="bankItemLabel">Account Number</div>
+                <div className="bankItemValue">{PAYMENT_INFO.bank.accountNumber}</div>
               </div>
 
-              <div className="bank-detail-item">
-                <div className="bank-detail-item__label">
-                  IFSC Code
-                </div>
+              <div className="bankItem">
+                <div className="bankItemLabel">IFSC Code</div>
+                <div className="bankItemValue">{PAYMENT_INFO.bank.ifscCode}</div>
+              </div>
+              <div className="bankItem">
+                <div className="bankItemLabel">Beneficiary Name</div>
+                <div className="bankItemValue">{PAYMENT_INFO.bank.beneficiaryName}</div>
+              </div>
 
-                <div className="bank-detail-item__value">
-                  {PAYMENT_INFO.bank.ifscCode}
-                </div>
-              </div>
-              <div className="bank-detail-item">
-                <div className="bank-detail-item__label">Beneficiary Name</div>
-                <div className="bank-detail-item__value">{PAYMENT_INFO.bank.beneficiaryName}</div>
-              </div>
-              <div className="bank-detail-item">
-                <div className="bank-detail-item__label">Account Type</div>
-                <div className="bank-detail-item__value">{PAYMENT_INFO.bank.accountType}</div>
+              <div className="bankItem">
+                <div className="bankItemLabel">Account Type</div>
+                <div className="bankItemValue">{PAYMENT_INFO.bank.accountType}</div>
               </div>
             </div>
           )}
-
         </section>
 
-        {/* Payment Submission Section */}
-        <section className="section-card">
+        {/* ── Section 2: Submit Payment Details Form ──────────────── */}
+        <section className="section" aria-label="Submit payment details">
+          <h2 className="sectionTitle">Submit Payment Details</h2>
+          <p className="sectionSubtitle">
+            Fill in your payment confirmation details after completing the transaction.
+          </p>
+          <hr className="divider" />
 
-          <div className="hud-corner top-left"></div>
-          <div className="hud-corner top-right"></div>
-          <div className="hud-corner bottom-left"></div>
-          <div className="hud-corner bottom-right"></div>
-
-          <div className="section-card__header">
-
-            <div className="section-card__icon">
-              📤
-            </div>
-
-            <div>
-              <h2 className="section-card__title">
-                Submit Payment Details
-              </h2>
-
-              <p className="section-card__description">
-                Fill in your payment details after completing the transaction
-              </p>
-            </div>
-
-          </div>
-
-          <form onSubmit={handleSubmit}>
-
+          <form onSubmit={handleSubmit} noValidate>
             {/* Payment Method */}
-            <div className="form-group">
-
-              <label className="form-label">
-                Payment Method{' '}
-                <span className="required">*</span>
+            <div className="fieldGroup">
+              <label className="label" htmlFor="paymentMethod">
+                Payment Method<span className="required">*</span>
               </label>
-
               <select
-                className="form-select"
+                id="paymentMethod"
                 name="paymentMethod"
+                className={`select ${errors.paymentMethod ? 'inputError' : ''}`}
                 value={formData.paymentMethod}
                 onChange={handleInputChange}
               >
-
-                <option value="">
-                  Select payment method
-                </option>
-
-                <option value="UPI">
-                  UPI
-                </option>
-
-                <option value="Bank Transfer">
-                  Bank Transfer
-                </option>
-
-                <option value="Other">
-                  Other
-                </option>
-
+                <option value="UPI">UPI</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="Other">Other</option>
               </select>
-
               {errors.paymentMethod && (
-                <div className="error-message">
-                  ⚠ {errors.paymentMethod}
-                </div>
+                <span className="errorMsg" role="alert">
+                  {errors.paymentMethod}
+                </span>
               )}
-
             </div>
 
-            {/* Transaction ID & Date */}
-            <div className="form-row">
-
-              <div className="form-group">
-
-                <label className="form-label">
-                  Transaction ID / UTR{' '}
-                  <span className="required">*</span>
+            {/* Transaction ID & Date Grid */}
+            <div className="grid">
+              <div className="fieldGroup">
+                <label className="label" htmlFor="transactionId">
+                  Transaction ID / UTR<span className="required">*</span>
                 </label>
-
                 <input
-                  className="form-input"
-                  type="text"
+                  id="transactionId"
                   name="transactionId"
+                  type="text"
+                  className={`input ${errors.transactionId ? 'inputError' : ''}`}
                   value={formData.transactionId}
                   onChange={handleInputChange}
-                  placeholder="Enter transaction ID or UTR number"
+                  placeholder="Enter 12-digit UTR or reference ID"
+                  autoComplete="off"
                 />
-
                 {errors.transactionId && (
-                  <div className="error-message">
-                    ⚠ {errors.transactionId}
-                  </div>
+                  <span className="errorMsg" role="alert">
+                    {errors.transactionId}
+                  </span>
                 )}
-
               </div>
 
-              <div className="form-group">
-
-                <label className="form-label">
-                  Transaction Date{' '}
-                  <span className="required">*</span>
+              <div className="fieldGroup">
+                <label className="label" htmlFor="transactionDate">
+                  Transaction Date<span className="required">*</span>
                 </label>
-
                 <input
-                  className="form-input"
-                  type="date"
+                  id="transactionDate"
                   name="transactionDate"
+                  type="date"
+                  className={`input ${errors.transactionDate ? 'inputError' : ''}`}
                   value={formData.transactionDate}
                   onChange={handleInputChange}
                 />
-
                 {errors.transactionDate && (
-                  <div className="error-message">
-                    ⚠ {errors.transactionDate}
-                  </div>
+                  <span className="errorMsg" role="alert">
+                    {errors.transactionDate}
+                  </span>
                 )}
-
               </div>
-
             </div>
 
             {/* Amount */}
-            <div className="form-group">
-
-              <label className="form-label">
-                Amount (₹){' '}
-                <span className="required">*</span>
+            <div className="fieldGroup">
+              <label className="label" htmlFor="amount">
+                Amount Paid (₹)<span className="required">*</span>
               </label>
-
               <input
-                className="form-input"
-                type="number"
+                id="amount"
                 name="amount"
-                value={formData.amount}
-                onChange={handleInputChange}
-                placeholder="Enter the amount paid"
+                type="number"
                 min="1"
                 step="0.01"
+                className={`input ${errors.amount ? 'inputError' : ''}`}
+                value={formData.amount}
+                onChange={handleInputChange}
+                placeholder="e.g. 500"
               />
-
               {errors.amount && (
-                <div className="error-message">
-                  ⚠ {errors.amount}
-                </div>
+                <span className="errorMsg" role="alert">
+                  {errors.amount}
+                </span>
               )}
-
             </div>
 
-            {/* File Upload */}
-            <div className="form-group">
-
-              <label className="form-label">
-                Payment Screenshot / Proof{' '}
-                <span className="required">*</span>
+            {/* Payment Screenshot Dropzone */}
+            <div className="fieldGroup">
+              <label className="label">
+                Payment Screenshot / Proof<span className="required">*</span>
               </label>
 
               <div
-                className={`file-upload-zone ${dragActive
-                    ? 'file-upload-zone--active'
-                    : ''
-                  } ${fileError
-                    ? 'file-upload-zone--error'
-                    : ''
-                  }`}
-                onClick={() =>
-                  fileInputRef.current?.click()
-                }
+                className={`fileDropZone ${dragActive ? 'fileDropZoneActive' : ''} ${
+                  fileError || errors.file ? 'fileDropZoneError' : ''
+                }`}
+                onClick={() => fileInputRef.current?.click()}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}
                 onDragOver={handleDrag}
                 onDrop={handleDrop}
+                role="button"
+                tabIndex={0}
+                aria-label="Upload payment screenshot"
               >
-
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -660,136 +484,55 @@ export default function PaymentPage() {
                   style={{ display: 'none' }}
                 />
 
-                <div className="file-upload-zone__icon">
-                  📁
-                </div>
-
-                <p className="file-upload-zone__text">
-                  <strong>
-                    Click to upload
-                  </strong>{' '}
-                  or drag and drop
+                <div className="fileDropIcon">📁</div>
+                <p className="fileDropText">
+                  <strong>Click to upload</strong> or drag and drop
                 </p>
-
-                <p className="file-upload-zone__hint">
-                  Supported formats: JPEG, PNG, JPG
-                  &bull; Max size: 10MB
+                <p className="fileDropHint">
+                  Supported formats: JPEG, PNG, JPG • Maximum file size: 10MB
                 </p>
-
               </div>
 
               {fileError && (
-                <div className="error-message">
-                  ⚠ {fileError}
-                </div>
+                <span className="errorMsg" role="alert">
+                  {fileError}
+                </span>
               )}
-
               {errors.file && !file && (
-                <div className="error-message">
-                  ⚠ {errors.file}
-                </div>
+                <span className="errorMsg" role="alert">
+                  {errors.file}
+                </span>
               )}
 
-              {/* File Preview */}
+              {/* Uploaded File Preview */}
               {file && filePreview && (
-                <div className="file-preview">
-
-                  <img
-                    className="file-preview__image"
-                    src={filePreview}
-                    alt="Preview"
-                  />
-
-                  <div className="file-preview__info">
-
-                    <div className="file-preview__name">
-                      {file.name}
-                    </div>
-
-                    <div className="file-preview__size">
-                      {formatFileSize(file.size)}
-                    </div>
-
+                <div className="filePreviewCard">
+                  <img className="filePreviewThumb" src={filePreview} alt="Screenshot preview" />
+                  <div className="filePreviewDetails">
+                    <div className="filePreviewName">{file.name}</div>
+                    <div className="filePreviewSize">{formatFileSize(file.size)}</div>
                   </div>
-
-                  <button
-                    type="button"
-                    className="file-preview__remove"
-                    onClick={removeFile}
-                  >
+                  <button type="button" className="removeBtn" onClick={removeFile}>
                     ✕ Remove
                   </button>
-
                 </div>
               )}
-
             </div>
 
-            {errors.submit && (
-              <div
-                className="error-message"
-                style={{ marginBottom: '16px' }}
-              >
-                ⚠ {errors.submit}
+            {/* Error Banner */}
+            {submitError && (
+              <div className="formError" role="alert">
+                {submitError}
               </div>
             )}
 
             {/* Submit Button */}
-            <button
-              type="submit"
-              className="submit-btn"
-              disabled={isSubmitting}
-            >
-              {isSubmitting
-                ? 'Submitting...'
-                : 'Submit Payment Details'}
+            <button type="submit" className="submitBtn" disabled={isSubmitting}>
+              {isSubmitting ? 'Submitting Payment...' : 'Submit Payment Details →'}
             </button>
-
           </form>
-
         </section>
-
       </div>
-
-      {/* Success Modal */}
-      {submitted && (
-        <div
-          className="success-overlay"
-          onClick={handleCloseSuccess}
-        >
-
-          <div
-            className="success-modal"
-            onClick={(e) =>
-              e.stopPropagation()
-            }
-          >
-
-            <div className="success-modal__icon">
-              ✅
-            </div>
-
-            <h3 className="success-modal__title">
-              Payment Submitted!
-            </h3>
-
-            <p className="success-modal__text">
-              Your payment details have been submitted successfully.
-              Our team will verify your payment and confirm your registration shortly.
-            </p>
-
-            <button
-              className="success-modal__btn"
-              onClick={handleCloseSuccess}
-            >
-              Done
-            </button>
-
-          </div>
-
-        </div>
-      )}
-
-    </div>
+    </main>
   )
 }

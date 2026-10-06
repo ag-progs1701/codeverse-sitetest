@@ -39,7 +39,14 @@ export default function RegisterPage() {
 
   // ── Form state — restored from ReviewPage if coming back ───────────
   const [formState, setFormState] = useState(
-    () => state?.registration ?? createInitialFormState()
+    () => state?.registration ?? (() => {
+      try {
+        const saved = sessionStorage.getItem("codeverse_registration");
+        return saved ? JSON.parse(saved) : createInitialFormState();
+      } catch {
+        return createInitialFormState();
+      }
+    })()
   );
 
   // ── Validation errors (only shown after first submit attempt) ─────
@@ -118,8 +125,13 @@ export default function RegisterPage() {
 
     if (!isFormValid(validationResult)) return;
 
-    // Pass collected registration data to the next step via router state
-    window.location.href = "/register/review";
+    // Pass collected registration data to the next step via router state and sessionStorage
+    try {
+      sessionStorage.setItem("codeverse_registration", JSON.stringify(formState));
+    } catch {
+      // ignore storage errors
+    }
+    navigate("/register/review", { state: { registration: formState } });
   }
 
   // ── Render ────────────────────────────────────────────────────────────

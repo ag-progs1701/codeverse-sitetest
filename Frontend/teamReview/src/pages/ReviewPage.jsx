@@ -1,19 +1,37 @@
-/**
+﻿/**
  * ReviewPage.jsx
  *
  * Route: /register/review
- * Purpose: Review registration details before submitting.
+ * Purpose: Visual review of all details entered on the Team Registration page.
+ *
+ * Uses the exact same design system as RegisterPage.
  */
 
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import styles from "./ReviewPage.module.css";
 
+const FIELDS = [
+  { key: "fullName", label: "Full Name" },
+  { key: "registrationNumber", label: "Registration Number" },
+  { key: "collegeEmail", label: "College Email" },
+  { key: "phoneNumber", label: "Phone Number" },
+];
+
 export default function ReviewPage() {
   const { state } = useLocation();
   const navigate = useNavigate();
 
-  const registration = state?.registration;
+  // Retrieve registration from navigation state or fallback sessionStorage
+  const [registration] = useState(() => {
+    if (state?.registration) return state.registration;
+    try {
+      const saved = sessionStorage.getItem("codeverse_registration");
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
 
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
@@ -21,25 +39,30 @@ export default function ReviewPage() {
   if (!registration) {
     return (
       <main className={styles.page}>
-        <div className={styles.guardBox}>
-          <span className={styles.guardIcon}>⚠️</span>
-          <h2 className={styles.guardTitle}>No registration data found.</h2>
-          <p className={styles.guardSub}>
-            Please complete the registration form first.
-          </p>
-
-          <button
-            className={styles.btnPrimary}
-            onClick={() => navigate("/register")}
-          >
-            ← Back to Registration
-          </button>
+        <div className={styles.container}>
+          <div className={styles.section}>
+            <div className={styles.guardBox}>
+              <span className={styles.guardIcon}>⚠️</span>
+              <h2 className={styles.guardTitle}>No registration data found.</h2>
+              <p className={styles.guardSub}>
+                Please complete the registration form first.
+              </p>
+              <button
+                type="button"
+                className={styles.submitBtn}
+                style={{ width: "auto", minWidth: "200px" }}
+                onClick={() => navigate("/register")}
+              >
+                ← Back to Registration
+              </button>
+            </div>
+          </div>
         </div>
       </main>
     );
   }
 
-  const { teamName, members } = registration;
+  const { teamName, members = [] } = registration;
 
   async function handleConfirmSubmit() {
     setSubmitting(true);
@@ -63,14 +86,25 @@ export default function ReviewPage() {
         throw new Error(data.error || "Registration failed.");
       }
 
-      // Registration successfully created in Supabase.
-      // Pass the returned teamId to the payment page.
+      // Save created team info to sessionStorage
+      try {
+        sessionStorage.setItem(
+          "codeverse_team",
+          JSON.stringify({
+            teamId: data.teamId,
+            teamName: data.teamName || teamName,
+          })
+        );
+      } catch {
+        // ignore storage error
+      }
+
+      // Redirect to Payment portal with teamId query parameter
       window.location.href = `http://localhost:5174/?teamId=${encodeURIComponent(
         data.teamId
       )}`;
     } catch (error) {
       console.error("Registration error:", error);
-
       setSubmitError(
         error.message || "Unable to submit registration. Please try again."
       );
@@ -82,127 +116,76 @@ export default function ReviewPage() {
   return (
     <main className={styles.page}>
       <div className={styles.container}>
-
-        {/* Top label */}
-        <p className={styles.topLabel}>
-          ✦ CodeVerse Hackathon · Registration Preview
+        <h1 className={styles.pageTitle}>Review Registration</h1>
+        <p className={styles.pageSubtitle}>
+          CodeVerse Hackathon — Review your team details before proceeding to payment.
         </p>
 
-        {/* Preview Card */}
-        <div className={styles.previewCard}>
+        {/* ── Team Information ────────────────────────────────────────── */}
+        <section className={styles.section} aria-label="Team information">
+          <h2 className={styles.sectionTitle}>Team Information</h2>
+          <hr className={styles.divider} />
 
-          {/* Glowing top bar */}
-          <div className={styles.cardGlow} />
-
-          {/* Team banner */}
-          <div className={styles.teamBanner}>
-            <div className={styles.teamIconWrap}>
-              <span className={styles.teamIcon}>⚡</span>
-            </div>
-
-            <div className={styles.teamInfo}>
-              <span className={styles.teamLabel}>TEAM NAME</span>
-              <h1 className={styles.teamName}>{teamName}</h1>
-            </div>
-
-            <div className={styles.teamStatBadge}>
-              <span className={styles.statNum}>{members.length}</span>
-              <span className={styles.statLabel}>Members</span>
-            </div>
+          <div className={styles.fieldGroup}>
+            <label className={styles.label}>Team Name</label>
+            <div className={styles.valueBox}>{teamName || <span className={styles.empty}>Not specified</span>}</div>
           </div>
+        </section>
 
-          <div className={styles.cardDivider} />
-
-          {/* Members */}
-          <div className={styles.membersLabel}>
-            <span className={styles.sectionTag}>Team Members</span>
-          </div>
-
-          <div className={styles.membersGrid}>
-            {members.map((member, idx) => (
-              <div
-                key={idx}
-                className={`${styles.memberChip} ${idx === 0 ? styles.leaderChip : ""
-                  }`}
-              >
-                {/* Avatar */}
-                <div className={styles.avatar}>
-                  {member.fullName
-                    ? member.fullName.trim().charAt(0).toUpperCase()
-                    : "?"}
-                </div>
-
-                {/* Details */}
-                <div className={styles.chipDetails}>
-
-                  <div className={styles.chipNameRow}>
-                    <span className={styles.chipName}>
-                      {member.fullName || (
-                        <em className={styles.empty}>No name</em>
-                      )}
-                    </span>
-
-                    {idx === 0 && (
-                      <span className={styles.leaderTag}>
-                        👑 Leader
-                      </span>
-                    )}
-                  </div>
-
-                  <div className={styles.infoPills}>
-                    <span className={styles.pill}>
-                      <span className={styles.pillIcon}>🎓</span>
-                      {member.registrationNumber || "—"}
-                    </span>
-
-                    <span className={styles.pill}>
-                      <span className={styles.pillIcon}>✉️</span>
-                      {member.collegeEmail || "—"}
-                    </span>
-
-                    <span className={styles.pill}>
-                      <span className={styles.pillIcon}>📞</span>
-                      {member.phoneNumber || "—"}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Member number */}
-                <span className={styles.memberNum}>
-                  #{idx + 1}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {/* Footer note */}
-          <div className={styles.cardFooter}>
-            <span className={styles.footerNote}>
-              🔒 Please verify all details before submitting.
+        {/* ── Team Members ──────────────────────────────────────────── */}
+        <section className={styles.section} aria-label="Team members">
+          <div className={styles.membersHeader}>
+            <h2 className={styles.sectionTitle}>Team Members</h2>
+            <span className={styles.membersMeta}>
+              {members.length} {members.length === 1 ? "member" : "members"}
             </span>
           </div>
-        </div>
+          <hr className={styles.divider} />
 
-        {/* Error */}
+          <div className={styles.memberList}>
+            {members.map((member, index) => {
+              const isLeader = index === 0;
+              return (
+                <div key={index} className={styles.card}>
+                  <div className={styles.cardHeader}>
+                    <h3 className={styles.cardTitle}>
+                      Member {index + 1}
+                      {isLeader && (
+                        <span className={styles.leaderNote}>
+                          * Member 1 is the Team Leader.
+                        </span>
+                      )}
+                    </h3>
+                  </div>
+
+                  <div className={styles.grid}>
+                    {FIELDS.map(({ key, label }) => (
+                      <div className={styles.fieldGroup} key={key}>
+                        <label className={styles.label}>{label}</label>
+                        <div className={styles.valueBox}>
+                          {member[key] || <span className={styles.empty}>—</span>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ── Error banner ──────────────────────────────────────────── */}
         {submitError && (
-          <div
-            role="alert"
-            style={{
-              marginTop: "16px",
-              padding: "12px 16px",
-              borderRadius: "8px",
-              background: "#ffe5e5",
-              color: "#b00020",
-            }}
-          >
+          <div className={styles.formError} role="alert">
             {submitError}
           </div>
         )}
 
-        {/* Actions */}
-        <div className={styles.actions}>
+        {/* ── Action buttons ────────────────────────────────────────── */}
+        <div className={styles.actionRow}>
           <button
-            className={styles.btnSecondary}
+            type="button"
+            className={styles.editBtn}
             onClick={() =>
               navigate("/register", {
                 state: { registration },
@@ -214,16 +197,14 @@ export default function ReviewPage() {
           </button>
 
           <button
-            className={styles.btnPrimary}
+            type="button"
+            className={styles.submitBtn}
             onClick={handleConfirmSubmit}
             disabled={submitting}
           >
-            {submitting
-              ? "Submitting..."
-              : "Confirm & Submit →"}
+            {submitting ? "Submitting..." : "Confirm & Submit →"}
           </button>
         </div>
-
       </div>
     </main>
   );

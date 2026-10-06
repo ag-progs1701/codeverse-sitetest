@@ -1,10 +1,10 @@
-/* ============================================================
-   ReviewPage.module.css  —  FrontEnd/teamReview/src/pages/
-   Mirrors RegisterPage.module.css exactly.
-   Read-only .valueBox replaces .input.
+﻿/* ============================================================
+   ReviewPage.module.css
+   Matches RegisterPage.module.css exactly.
+   Dark blue & black aesthetic with solid #030711 background.
    ============================================================ */
 
-/* ── Page ─────────────────────────────────────────────────── */
+/* Page wrapper - Solid Dark Blue/Black */
 .page {
   min-height: 100vh;
   background-color: #030711;
@@ -17,7 +17,7 @@
   margin: 0 auto;
 }
 
-/* ── Headings ─────────────────────────────────────────────── */
+/* Page heading */
 .pageTitle {
   font-size: 2rem;
   font-weight: 800;
@@ -35,7 +35,7 @@
   letter-spacing: 0.02em;
 }
 
-/* ── Section card ─────────────────────────────────────────── */
+/* Section card (wraps Team Name + Members list) */
 .section {
   background-color: #08111e;
   border: 1px solid #14243b;
@@ -59,7 +59,7 @@
   margin: 20px 0;
 }
 
-/* ── Field group (label + value) ──────────────────────────── */
+/* Team Name field */
 .fieldGroup {
   display: flex;
   flex-direction: column;
@@ -71,9 +71,10 @@
   font-size: 0.85rem;
   font-weight: 500;
   color: #94a3b8;
+  letter-spacing: 0.01em;
 }
 
-/* Read-only value box — same size/shape as the input */
+/* Read-only value box matching input styling */
 .valueBox {
   padding: 11px 14px;
   font-size: 0.9rem;
@@ -84,10 +85,8 @@
   background-color: #03070f;
   color: #f1f5f9;
   min-height: 42px;
-  /* subtle "locked" look */
-  opacity: 0.85;
-  cursor: default;
-  user-select: text;
+  display: flex;
+  align-items: center;
 }
 
 .empty {
@@ -95,7 +94,7 @@
   font-style: italic;
 }
 
-/* ── Members header ───────────────────────────────────────── */
+/* Members section heading row */
 .membersHeader {
   display: flex;
   align-items: baseline;
@@ -116,6 +115,7 @@
   letter-spacing: 0.02em;
 }
 
+/* Stack of member cards */
 .memberList {
   display: flex;
   flex-direction: column;
@@ -123,12 +123,18 @@
   margin-top: 18px;
 }
 
-/* ── Member card ──────────────────────────────────────────── */
+/* Single member card */
 .card {
   border: 1px solid #1a2f4c;
   border-radius: 10px;
   padding: 22px 24px;
   background-color: #070e1a;
+  position: relative;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  border-color: #244169;
 }
 
 .cardHeader {
@@ -156,7 +162,6 @@
   letter-spacing: 0.02em;
 }
 
-/* 2-column grid — same as MemberCard */
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -164,10 +169,23 @@
 }
 
 @media (max-width: 600px) {
-  .grid { grid-template-columns: 1fr; }
+  .grid {
+    grid-template-columns: 1fr;
+  }
 }
 
-/* ── Action buttons ───────────────────────────────────────── */
+/* Form-level error banner */
+.formError {
+  background-color: #1a080a;
+  border: 1px solid #7f1d1d;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 0.88rem;
+  color: #fca5a5;
+  margin-bottom: 22px;
+}
+
+/* Action button row */
 .actionRow {
   display: flex;
   gap: 14px;
@@ -188,9 +206,10 @@
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
+  text-align: center;
 }
 
-.editBtn:hover {
+.editBtn:hover:not(:disabled) {
   background-color: #0d1e31;
   border-color: #244169;
   color: #e2e8f0;
@@ -212,27 +231,58 @@
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 4px 18px rgba(0, 119, 182, 0.45);
+  text-align: center;
 }
 
-.submitBtn:hover {
+.submitBtn:hover:not(:disabled) {
   background-color: #0096c7;
   border-color: #48cae4;
   box-shadow: 0 6px 24px rgba(0, 180, 216, 0.6);
   transform: translateY(-1px);
 }
 
-/* ── Link button (guard state) ────────────────────────────── */
-.linkBtn {
-  background: none;
-  border: none;
-  color: #38bdf8;
-  cursor: pointer;
-  font-size: inherit;
-  text-decoration: underline;
-  padding: 0;
+.submitBtn:disabled,
+.editBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Guard / No Data fallback */
+.guardBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.guardIcon {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+}
+
+.guardTitle {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 8px;
+}
+
+.guardSub {
+  font-size: 0.95rem;
+  color: #94a3b8;
+  margin: 0 0 24px;
 }
 
 @media (max-width: 600px) {
-  .actionRow { flex-direction: column; }
-  .editBtn, .submitBtn { flex: unset; width: 100%; }
+  .actionRow {
+    flex-direction: column;
+  }
+  .editBtn,
+  .submitBtn {
+    flex: unset;
+    width: 100%;
+  }
 }

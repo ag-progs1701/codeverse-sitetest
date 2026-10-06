@@ -7,16 +7,14 @@ const ACCEPTED_EXTENSIONS = '.jpeg,.png,.jpg'
 // Dummy payment data — replace with real data later
 const PAYMENT_INFO = {
   upi: {
-    id: 'metaversevitb@indianbk',
-    qrCodeUrl: '/upi-qr.jpg',
+    id: 'dummy@upi',
+    qrCodeUrl: '/upi-qr.jpg', // Placeholder image path
   },
   bank: {
-    holderName: 'METAVERSITY CLUB VIT BHOPAL',
-    bankName: 'INDIAN BANK',
-    accountNumber: '7967541510',
-    ifscCode: 'IDIB000V143',
-    beneficiaryName: 'METAVERSE CLUB',
-    accountType: 'SB',
+    holderName: 'John Doe',
+    bankName: 'Dummy Bank',
+    accountNumber: '123456789012',
+    ifscCode: 'DUMMY0001234',
   },
 }
 
@@ -276,10 +274,6 @@ export default function PaymentPage() {
           {activeTab === 'bank' && (
             <div className="bank-details-grid">
               <div className="bank-detail-item">
-                <div className="bank-detail-item__label">Beneficiary Name</div>
-                <div className="bank-detail-item__value">{PAYMENT_INFO.bank.beneficiaryName}</div>
-              </div>
-              <div className="bank-detail-item">
                 <div className="bank-detail-item__label">Account Holder Name</div>
                 <div className="bank-detail-item__value">{PAYMENT_INFO.bank.holderName}</div>
               </div>
@@ -294,10 +288,6 @@ export default function PaymentPage() {
               <div className="bank-detail-item">
                 <div className="bank-detail-item__label">IFSC Code</div>
                 <div className="bank-detail-item__value">{PAYMENT_INFO.bank.ifscCode}</div>
-              </div>
-              <div className="bank-detail-item">
-                <div className="bank-detail-item__label">Account Type</div>
-                <div className="bank-detail-item__value">{PAYMENT_INFO.bank.accountType}</div>
               </div>
             </div>
           )}

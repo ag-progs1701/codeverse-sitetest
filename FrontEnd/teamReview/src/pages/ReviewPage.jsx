@@ -111,7 +111,7 @@ export default function ReviewPage() {
           </button>
           <button
             className={styles.submitBtn}
-            onClick={() => {}}
+            onClick={() => navigate("/register/payment", { state: { registration } })}
           >
             Confirm &amp; Submit →
           </button>

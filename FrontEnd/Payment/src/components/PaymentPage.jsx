@@ -1,4 +1,6 @@
 import { useState, useRef } from 'react'
+import { useLocation } from 'react-router-dom'
+import '../index.css'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB in bytes
 const ACCEPTED_FORMATS = ['image/jpeg', 'image/png', 'image/jpg']
@@ -19,6 +21,7 @@ const PAYMENT_INFO = {
 }
 
 export default function PaymentPage() {
+  const location = useLocation()
   const [activeTab, setActiveTab] = useState('upi')
   const [copied, setCopied] = useState(false)
   const [formData, setFormData] = useState({
@@ -151,9 +154,8 @@ export default function PaymentPage() {
       formDataToSend.append('transactionDate', formData.transactionDate)
       formDataToSend.append('amount', formData.amount)
       
-      // Extract team name from URL if passed
-      const urlParams = new URLSearchParams(window.location.search)
-      const teamName = urlParams.get('team') || 'Unknown Team'
+      // Extract team name from state if passed
+      const teamName = location.state?.registration?.teamName || 'Unknown Team'
       formDataToSend.append('teamName', teamName)
       
       formDataToSend.append('screenshot', file)

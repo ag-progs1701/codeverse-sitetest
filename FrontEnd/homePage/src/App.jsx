@@ -21,6 +21,9 @@ import RegisterPage from "../../teamRegistration/src/pages/RegisterPage";
 // Review / preview page — lives in teamReview folder
 import ReviewPage from "../../teamReview/src/pages/ReviewPage";
 
+// Payment page — lives in Payment folder
+import PaymentPage from "../../Payment/src/components/PaymentPage";
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -33,6 +36,9 @@ export default function App() {
 
         {/* ③ Team Review / Preview */}
         <Route path="/register/review" element={<ReviewPage />} />
+        
+        {/* ④ Payment Page */}
+        <Route path="/register/payment" element={<PaymentPage />} />
       </Routes>
     </BrowserRouter>
   );

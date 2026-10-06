@@ -23,21 +23,10 @@ import {
   validateForm,
   isFormValid,
   validateTeamName,
-  validateFullName,
-  validateRegistrationNumber,
-  validateCollegeEmail,
-  validatePhoneNumber,
 } from "../utils/validation";
 
 import styles from "./RegisterPage.module.css";
 
-/** Map field key → its individual validator */
-const FIELD_VALIDATORS = {
-  fullName: validateFullName,
-  registrationNumber: validateRegistrationNumber,
-  collegeEmail: validateCollegeEmail,
-  phoneNumber: validatePhoneNumber,
-};
 
 /** Empty per-member error object */
 function emptyMemberError() {
@@ -73,23 +62,23 @@ export default function RegisterPage() {
   }
 
   function handleMemberChange(index, field, value) {
-    setFormState((prev) => ({
-      ...prev,
-      members: prev.members.map((m, i) =>
-        i === index ? { ...m, [field]: value } : m
-      ),
-    }));
+    // Build the updated form state first, then validate it in full
+    // so cross-member duplicate checks are always reflected live.
+    setFormState((prev) => {
+      const updated = {
+        ...prev,
+        members: prev.members.map((m, i) =>
+          i === index ? { ...m, [field]: value } : m
+        ),
+      };
 
-    if (submitted) {
-      setErrors((prev) => {
-        const memberErrors = prev.memberErrors.map((err, i) => {
-          if (i !== index) return err;
-          const validator = FIELD_VALIDATORS[field];
-          return { ...err, [field]: validator ? validator(value) : "" };
-        });
-        return { ...prev, memberErrors };
-      });
-    }
+      if (submitted) {
+        // Re-validate the whole form (including duplicate detection)
+        setErrors(validateForm(updated));
+      }
+
+      return updated;
+    });
   }
 
   function handleAddMember() {

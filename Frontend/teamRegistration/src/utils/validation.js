@@ -51,13 +51,49 @@ export function validateMember(member) {
 }
 
 /**
- * Validate the entire form.
+ * Validate the entire form, including cross-member duplicate checks.
  * Returns { teamNameError, memberErrors[] }
  * memberErrors is an array parallel to formState.members.
+ *
+ * Duplicate checks (case-insensitive) on:
+ *   - registrationNumber
+ *   - collegeEmail
+ *   - phoneNumber
  */
 export function validateForm(formState) {
   const teamNameError = validateTeamName(formState.teamName);
   const memberErrors = formState.members.map(validateMember);
+
+  // ── Duplicate detection ────────────────────────────────────────────
+  const fields = ["registrationNumber", "collegeEmail", "phoneNumber"];
+  const dupMessages = {
+    registrationNumber: "Registration number must be unique across all members.",
+    collegeEmail: "Email address must be unique across all members.",
+    phoneNumber: "Phone number must be unique across all members.",
+  };
+
+  fields.forEach((field) => {
+    // Build a map: normalised value → list of member indices that have it
+    const seen = new Map();
+    formState.members.forEach((member, idx) => {
+      const val = (member[field] || "").trim().toLowerCase();
+      if (!val) return; // empty values are caught by individual validators
+      if (!seen.has(val)) seen.set(val, []);
+      seen.get(val).push(idx);
+    });
+
+    // For every duplicated value, mark every participating index with an error
+    seen.forEach((indices) => {
+      if (indices.length < 2) return;
+      indices.forEach((idx) => {
+        // Only override if the individual field is currently valid (no prior error)
+        if (!memberErrors[idx][field]) {
+          memberErrors[idx] = { ...memberErrors[idx], [field]: dupMessages[field] };
+        }
+      });
+    });
+  });
+
   return { teamNameError, memberErrors };
 }
 

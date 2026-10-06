@@ -1,8 +1,8 @@
 import { useState, useRef } from 'react'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB in bytes
-const ACCEPTED_FORMATS = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp']
-const ACCEPTED_EXTENSIONS = '.jpeg,.png,.jpg,.gif,.webp'
+const ACCEPTED_FORMATS = ['image/jpeg', 'image/png', 'image/jpg']
+const ACCEPTED_EXTENSIONS = '.jpeg,.png,.jpg'
 
 // Dummy payment data — replace with real data later
 const PAYMENT_INFO = {
@@ -66,7 +66,7 @@ export default function PaymentPage() {
   const validateFile = (selectedFile) => {
     if (!selectedFile) return ''
     if (!ACCEPTED_FORMATS.includes(selectedFile.type)) {
-      return 'Invalid file format. Please upload a JPEG, PNG, JPG, GIF, or WebP image.'
+      return 'Invalid file format. Please upload a JPEG, PNG, or JPG image.'
     }
     if (selectedFile.size > MAX_FILE_SIZE) {
       return `File size exceeds 10MB. Your file is ${(selectedFile.size / (1024 * 1024)).toFixed(2)}MB.`
@@ -411,7 +411,7 @@ export default function PaymentPage() {
                   <strong>Click to upload</strong> or drag and drop
                 </p>
                 <p className="file-upload-zone__hint">
-                  Supported formats: JPEG, PNG, JPG, GIF, WebP &bull; Max size: 10MB
+                  Supported formats: JPEG, PNG, JPG &bull; Max size: 10MB
                 </p>
               </div>
               {fileError && <div className="error-message">⚠ {fileError}</div>}

@@ -1,0 +1,113 @@
+.heroContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 48px 20px 24px;
+  position: relative;
+  z-index: 10;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 9999px;
+  background: rgba(0, 150, 255, 0.08);
+  border: 1px solid rgba(0, 210, 255, 0.3);
+  color: #38bdf8;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  box-shadow: 0 0 16px rgba(0, 210, 255, 0.15);
+  backdrop-filter: blur(8px);
+}
+
+.badgeDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #00d2ff;
+  box-shadow: 0 0 8px #00d2ff;
+  animation: pulseDot 2s ease-in-out infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.85);
+  }
+}
+
+.mainTitle {
+  font-size: clamp(3rem, 8vw, 5.8rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: #ffffff;
+  text-transform: uppercase;
+  margin: 0 0 16px 0;
+  line-height: 1.1;
+  text-shadow: 0 0 25px rgba(0, 210, 255, 0.4), 0 0 50px rgba(0, 120, 255, 0.2);
+  transition: text-shadow 0.3s ease;
+}
+
+.tagline {
+  font-size: clamp(1.05rem, 2.8vw, 1.4rem);
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  color: #cbd5e1;
+  text-transform: uppercase;
+  margin: 0;
+  max-width: 600px;
+  line-height: 1.5;
+}
+
+.taglineHighlight {
+  color: #38bdf8;
+  font-weight: 600;
+  text-shadow: 0 0 12px rgba(56, 189, 248, 0.35);
+}
+
+/* Subtle separator / aesthetic element */
+.subtleGlowOrb {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: clamp(280px, 50vw, 550px);
+  height: clamp(140px, 25vw, 260px);
+  background: radial-gradient(ellipse at center, rgba(0, 180, 255, 0.15), rgba(0, 100, 255, 0.04) 50%, transparent 75%);
+  pointer-events: none;
+  z-index: -1;
+  filter: blur(28px);
+}
+
+@media (max-width: 640px) {
+  .heroContainer {
+    padding: 32px 16px 16px;
+  }
+
+  .badge {
+    font-size: 0.7rem;
+    padding: 5px 12px;
+    margin-bottom: 18px;
+  }
+
+  .mainTitle {
+    letter-spacing: 0.06em;
+    margin-bottom: 12px;
+  }
+
+  .tagline {
+    font-size: 0.95rem;
+    letter-spacing: 0.1em;
+  }
+}

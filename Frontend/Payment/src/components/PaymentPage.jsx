@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import '../index.css'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
@@ -25,10 +25,11 @@ export default function PaymentPage() {
   const location = useLocation()
   const navigate = useNavigate()
 
-  // Retrieve teamId and teamName from search params, location state, or sessionStorage
-  const [teamInfo] = useState(() => {
-    const searchParams = new URLSearchParams(location.search)
-    const paramTeamId = searchParams.get('teamId')
+  // Retrieve teamId and teamName internally from search params, location state, or sessionStorage
+  const [teamInfo, setTeamInfo] = useState(() => {
+    const searchParams = new URLSearchParams(location.search || window.location.search)
+    const paramTeamId = searchParams.get('teamId') || searchParams.get('id')
+    const paramTeamName = searchParams.get('teamName') || searchParams.get('team')
 
     let stored = null
     try {
@@ -40,13 +41,42 @@ export default function PaymentPage() {
 
     const teamId = paramTeamId || location.state?.teamId || stored?.teamId || ''
     const teamName =
+      paramTeamName ||
       location.state?.teamName ||
       location.state?.registration?.teamName ||
       stored?.teamName ||
-      'Unknown Team'
+      ''
+
+    if (teamId) {
+      try {
+        sessionStorage.setItem('codeverse_team', JSON.stringify({ teamId, teamName }))
+      } catch {
+        // ignore storage error
+      }
+    }
 
     return { teamId, teamName }
   })
+
+  // Keep teamInfo in sync if URL query parameter updates
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search || window.location.search)
+    const paramTeamId = searchParams.get('teamId') || searchParams.get('id')
+    const paramTeamName = searchParams.get('teamName') || searchParams.get('team')
+
+    if (paramTeamId && paramTeamId !== teamInfo.teamId) {
+      const updated = {
+        teamId: paramTeamId,
+        teamName: paramTeamName || teamInfo.teamName,
+      }
+      setTeamInfo(updated)
+      try {
+        sessionStorage.setItem('codeverse_team', JSON.stringify(updated))
+      } catch {
+        // ignore
+      }
+    }
+  }, [location.search, teamInfo.teamId, teamInfo.teamName])
 
   const [activeTab, setActiveTab] = useState('upi')
   const [copied, setCopied] = useState(false)
@@ -192,6 +222,13 @@ export default function PaymentPage() {
     setSubmitError('')
 
     if (!validateForm()) {
+      return
+    }
+
+    if (!teamInfo.teamId) {
+      setSubmitError(
+        'Missing registration session: Team ID was not found. Please submit your team registration from the review page first.'
+      )
       return
     }
 

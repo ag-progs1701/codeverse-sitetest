@@ -244,7 +244,7 @@ export default function PaymentPage() {
     formDataToSend.append('screenshot', file)
 
     try {
-      const response = await fetch('http://localhost:5000/api/submit-payment', {
+      const response = await fetch('https://codeverse-sitetest.onrender.com/api/submit-payment', {
         method: 'POST',
         body: formDataToSend,
       })

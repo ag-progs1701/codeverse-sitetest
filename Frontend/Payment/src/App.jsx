@@ -7,6 +7,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<PaymentPage />} />
+        <Route path="/register/payment" element={<PaymentPage />} />
+        <Route path="/register/confirmation" element={<ConfirmationPage />} />
         <Route path="/confirmation" element={<ConfirmationPage />} />
       </Routes>
     </BrowserRouter>

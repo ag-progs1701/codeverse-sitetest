@@ -104,10 +104,13 @@ export default function ReviewPage() {
         // ignore storage error
       }
 
-      // Redirect to Payment portal with teamId query parameter
-      window.location.href = `http://localhost:5174/?teamId=${encodeURIComponent(
-        data.teamId
-      )}`;
+      // Navigate to Payment portal route preserving teamId query parameter and state
+      navigate(`/register/payment?teamId=${encodeURIComponent(data.teamId)}`, {
+        state: {
+          teamId: data.teamId,
+          teamName: data.teamName || teamName,
+        }
+      });
     } catch (error) {
       console.error("Registration error:", error);
       isSubmittingRef.current = false;

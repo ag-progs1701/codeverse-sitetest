@@ -1,9 +1,10 @@
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import '../index.css'
 
 export default function ConfirmationPage() {
   const location = useLocation()
+  const navigate = useNavigate()
 
   // Retrieve confirmation state from navigation or fallback sessionStorage
   const [confirmation] = useState(() => {
@@ -101,7 +102,7 @@ export default function ConfirmationPage() {
                 } catch {
                   // ignore
                 }
-                window.location.href = 'http://localhost:5173/register'
+                navigate('/register')
               }}
             >
               Register Another Team →

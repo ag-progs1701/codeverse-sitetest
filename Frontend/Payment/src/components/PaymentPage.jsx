@@ -268,7 +268,7 @@ export default function PaymentPage() {
         // ignore
       }
 
-      navigate('/confirmation', {
+      navigate('/register/confirmation', {
         state: confirmationState,
       })
     } catch (err) {

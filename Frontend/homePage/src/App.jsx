@@ -24,6 +24,9 @@ import ReviewPage from "../../teamReview/src/pages/ReviewPage";
 // Payment page — lives in Payment folder
 import PaymentPage from "../../Payment/src/components/PaymentPage";
 
+// Confirmation page — lives in Payment folder
+import ConfirmationPage from "../../Payment/src/components/ConfirmationPage";
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -39,6 +42,13 @@ export default function App() {
         
         {/* ④ Payment Page */}
         <Route path="/register/payment" element={<PaymentPage />} />
+
+        {/* ⑤ Confirmation Page */}
+        <Route path="/register/confirmation" element={<ConfirmationPage />} />
+
+        {/* Fallback alias routes */}
+        <Route path="/payment" element={<PaymentPage />} />
+        <Route path="/confirmation" element={<ConfirmationPage />} />
       </Routes>
     </BrowserRouter>
   );

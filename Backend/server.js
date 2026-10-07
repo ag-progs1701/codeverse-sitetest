@@ -462,7 +462,8 @@ app.post('/api/register', registrationLimiter, async (req, res) => {
       .from('teams')
       .insert({
         team_name: trimmedTeamName,
-        status: 'awaiting_payment'
+        status: 'awaiting_payment',
+        unique_id: null
       })
       .select()
       .single();

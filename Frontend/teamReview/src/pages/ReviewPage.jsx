@@ -7,7 +7,7 @@
  * Uses the exact same design system as RegisterPage.
  */
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import styles from "./ReviewPage.module.css";
 
@@ -35,6 +35,7 @@ export default function ReviewPage() {
 
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const isSubmittingRef = useRef(false);
 
   if (!registration) {
     return (
@@ -65,6 +66,10 @@ export default function ReviewPage() {
   const { teamName, members = [] } = registration;
 
   async function handleConfirmSubmit() {
+    if (isSubmittingRef.current || submitting) {
+      return;
+    }
+    isSubmittingRef.current = true;
     setSubmitting(true);
     setSubmitError("");
 
@@ -105,11 +110,11 @@ export default function ReviewPage() {
       )}`;
     } catch (error) {
       console.error("Registration error:", error);
+      isSubmittingRef.current = false;
+      setSubmitting(false);
       setSubmitError(
         error.message || "Unable to submit registration. Please try again."
       );
-    } finally {
-      setSubmitting(false);
     }
   }
 

@@ -495,6 +495,28 @@ app.post('/api/register', registrationLimiter, async (req, res) => {
         .delete()
         .eq('id', team.id);
 
+      if (memberError.code === '23505') {
+        const details = memberError.details || '';
+        const message = memberError.message || '';
+        const combined = `${message} ${details}`;
+
+        if (combined.includes('unique_member_email') || combined.includes('college_email')) {
+          const match = details.match(/Key \(college_email\)=\(([^)]+)\)/);
+          const emailMsg = match
+            ? `Member email '${match[1]}' is already registered.`
+            : 'Member email is already registered.';
+          return res.status(409).json({ error: emailMsg });
+        }
+
+        if (combined.includes('unique_member_reg_num') || combined.includes('college_registration_number')) {
+          const match = details.match(/Key \(college_registration_number\)=\(([^)]+)\)/);
+          const regMsg = match
+            ? `Registration number '${match[1]}' is already registered.`
+            : 'Registration number is already registered.';
+          return res.status(409).json({ error: regMsg });
+        }
+      }
+
       return res.status(500).json({
         error: 'Failed to create team members.'
       });
